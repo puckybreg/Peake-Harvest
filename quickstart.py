@@ -11,6 +11,29 @@ SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 # The ID and range of a sample spreadsheet.
 MICROGREENS_SPREADSHEET_ID = '18z6wp-rFMI5s_XQ4d2yhzR0HTwvO-lnq7z4u714qpgI'
 CONTACT_RANGE = 'Contact!A1:I30'
+HARVEST_OFFSET = 'harvest_offset!A1:G3'
+
+def read_harvest_offset(sheet):
+    # Grab the data about planting offset and soaking time from harvest_offset sheet
+    result = sheet.values().get(spreadsheetId=MICROGREENS_SPREADSHEET_ID,
+                                range=HARVEST_OFFSET).execute()
+
+    values = result.get('values', [])
+
+    # Collect first column
+    first_column = [item[0] for item in values]
+
+    # Remove first column
+    [item.pop(0) for item in values]
+
+    new_dict = {}
+
+    for i in range(values[0].__len__()):
+        column = [item[i] for item in values]
+        new_dict[column[0]] = {first_column[1]: column[1], first_column[2]: column[2]}
+
+    print("dict of harvest_offset", new_dict)
+    return new_dict
 
 def main():
     """Shows basic usage of the Sheets API.
@@ -39,6 +62,7 @@ def main():
 
     # Call the Sheets API
     sheet = service.spreadsheets()
+    read_harvest_offset(sheet)
     result = sheet.values().get(spreadsheetId=MICROGREENS_SPREADSHEET_ID,
                                 range=CONTACT_RANGE).execute()
     values = result.get('values', [])
@@ -48,11 +72,7 @@ def main():
     else:
         print('Name, Major:')
         for row in values:
-            # Print columns A and E, which correspond to indices 0 and 4.
-            print('%s, %s' % (row[0], row[4]))
-
-# def read_from_sheet():
-#     sheet_id = "1BEfJ726nwsCxrhDb2ngWRLvpVAWADZQ7"
+            print(row)
 
 
 if __name__ == '__main__':
